@@ -3,6 +3,7 @@ package http
 import (
 	"hash/crc64"
 	"io/fs"
+	"net/http"
 	"path"
 	"strconv"
 	"strings"
@@ -26,7 +27,8 @@ var cacheBuster = make(map[string]string)
 // error will be sent back to the browser.
 func RegisterAssetDirectory(prefix string, fsys fs.FS) {
 	serv := FileSystemServer{Fsys: fsys, SendModTime: false, UseCacheBuster: true}
-	RegisterPatternHandler(prefix, serv)
+	prefix = joinProxyPath(prefix)
+	RegisterStaticHandler(prefix, http.StripPrefix(prefix, serv))
 
 	// Walk the entire file system provided to register each file with the cache buster cache so
 	// that we know what hash to provide for that file.

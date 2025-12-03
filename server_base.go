@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/goradd/base"
-	http2 "github.com/goradd/goradd/pkg/http"
 	"github.com/goradd/serve/config"
+	http2 "github.com/goradd/serve/http"
 )
 
 // ServerBaseI defines the virtual functions that are callable on the Server.

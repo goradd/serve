@@ -24,14 +24,15 @@ var PatternMuxer Muxer = http.NewServeMux()
 // from behind the application facilities of session management, output buffering, etc.
 var AppMuxer Muxer = http.NewServeMux()
 
-// RegisterPatternHandler registers a handler for the given pattern.
+// RegisterStaticHandler registers a handler for the given pattern.
 //
 // The given handler is served immediately by the application without going through the application
 // handler stack. If you need session management, HSTS protection, authentication, etc., use
 // RegisterAppHandler.
 //
 // If a ProxyPath is set, it will automatically be inserted in front of the path in the pattern.
-func RegisterPatternHandler(pattern string, handler http.Handler) {
+// If the pattern has a path that ends in "/"
+func RegisterStaticHandler(pattern string, handler http.Handler) {
 	pattern = joinProxyPath(pattern)
 	PatternMuxer.Handle(pattern, handler)
 }

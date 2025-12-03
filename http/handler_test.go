@@ -43,7 +43,7 @@ func Test_PatternRegistrations(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			config.ProxyPath = tt.proxyPath
 			PatternMuxer = http.NewServeMux()
-			RegisterPatternHandler(tt.foundPath, http.HandlerFunc(fnFound))
+			RegisterStaticHandler(tt.foundPath, http.HandlerFunc(fnFound))
 			h := UseMuxer(PatternMuxer, http.HandlerFunc(fnNotFound))
 
 			req := httptest.NewRequest("GET", tt.path, nil)
