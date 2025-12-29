@@ -5,9 +5,9 @@ import (
 )
 
 // Muxer represents the typical functions available in a mux and allows you
-// to replace the default muxer here with a 3rd party mux, like the Gorilla mux.
+// to replace the default muxer here with a 3rd party mux.
 //
-// However, beware. The default Go muxer will do redirects. If this goradd application
+// However, beware. The default Go muxer will do redirects. If the application
 // is behind a reverse proxy that is rewriting the url, the Go muxer will not correctly
 // do rewrites because it will not include the reverse proxy path in the rewrite
 // rule, and things will break.
@@ -28,12 +28,12 @@ type Muxer interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
 }
 
-// UseMuxer serves a muxer such that if a handler cannot be found, or the found handler does not respond,
+// WithMuxer serves a muxer such that if a handler cannot be found, or the found handler does not respond,
 // control is past to the next handler.
 //
-// Note that the default Go Muxer is NOT recommended, as it improperly handles
+// Be careful using the standard Go Muxer, as it improperly handles
 // redirects if this is behind a reverse proxy.
-func UseMuxer(mux Muxer, next http.Handler) http.Handler {
+func WithMuxer(mux Muxer, next http.Handler) http.Handler {
 	if next == nil {
 		panic("next may not be nil. Pass a http.NotFoundHandler if this is the end of the handler chain")
 	}

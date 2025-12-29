@@ -20,6 +20,6 @@ func (mgr Mock) Use(next http.Handler) http.Handler {
 func (mgr Mock) With(ctx context.Context) context.Context {
 	sessionData := NewSession()
 
-	ctx = context.WithValue(ctx, sessionContext, sessionData)
+	ctx = context.WithValue(ctx, sessionContext{}, sessionData)
 	return ctx
 }

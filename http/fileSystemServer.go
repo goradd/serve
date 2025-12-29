@@ -14,6 +14,7 @@ import (
 	"github.com/andybalholm/brotli"
 	strings2 "github.com/goradd/goradd/pkg/strings"
 	"github.com/goradd/serve/config"
+	"github.com/goradd/serve/log"
 )
 
 // FileSystemServer serves a file system as an http.Handler.
@@ -110,14 +111,18 @@ func (f FileSystemServer) serveStaticFile(w http.ResponseWriter, r *http.Request
 	// Check for compressed versions
 	if foundPath := p + BrotliSuffix; acceptsBr && f.pathExists(foundPath) {
 		if err := f.servePath(w, r, p, foundPath, "br"); err != nil {
-			slog.Error(err.Error(), slog.String("file", foundPath))
+			log.Error(r.Context(), logModule, "Error serving brotli file",
+				slog.Any("error", err),
+				slog.String("file", foundPath))
 			return false
 		}
 		return true
 	}
 	if foundPath := p + GZipSuffix; acceptsGzip && f.pathExists(foundPath) {
 		if err := f.servePath(w, r, p, foundPath, "gzip"); err != nil {
-			slog.Error(err.Error(), slog.String("file", foundPath))
+			log.Error(r.Context(), logModule, "Error serving gzip file",
+				slog.Any("error", err),
+				slog.String("file", foundPath))
 			return false
 		}
 		return true
@@ -133,14 +138,18 @@ func (f FileSystemServer) serveStaticFile(w http.ResponseWriter, r *http.Request
 
 	if foundPath := p + BrotliSuffix; f.pathExists(foundPath) {
 		if err := f.serveDecompressedBrotli(w, r, p, foundPath); err != nil {
-			slog.Error(err.Error(), slog.String("file", foundPath))
+			log.Error(r.Context(), logModule, "Error serving brotli file",
+				slog.Any("error", err),
+				slog.String("file", foundPath))
 			return false
 		}
 		return true
 	}
 	if foundPath := p + GZipSuffix; f.pathExists(foundPath) {
 		if err := f.serveDecompressedGzip(w, r, p, foundPath); err != nil {
-			slog.Error(err.Error(), slog.String("file", foundPath))
+			log.Error(r.Context(), logModule, "Error serving gzip file",
+				slog.Any("error", err),
+				slog.String("file", foundPath))
 			return false
 		}
 		return true

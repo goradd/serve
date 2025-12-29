@@ -95,3 +95,13 @@ func joinProxyPath(pattern string) string {
 	newPattern := pattern[:offset] + config.ProxyPath + pattern[offset:]
 	return newPattern
 }
+
+// WithAppMuxer serves up the AppMuxer.
+func WithAppMuxer(next http.Handler) http.Handler {
+	return WithMuxer(AppMuxer, next)
+}
+
+// WithPatternMuxer serves up the PatternMuxer.
+func WithPatternMuxer(next http.Handler) http.Handler {
+	return WithMuxer(PatternMuxer, next)
+}

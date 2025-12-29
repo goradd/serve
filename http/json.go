@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+
+	"github.com/goradd/serve/log"
 )
 
 // ParseJsonBody will look for json in the request, parse it into the given dest, and handle errors.
@@ -44,6 +46,9 @@ func ParseJsonBody(w http.ResponseWriter, r *http.Request, maxBytes int64, dest 
 			err2 := fmt.Errorf("request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, err2.Error())
+			log.Info(r.Context(), logModule, "Request body contains badly-formed JSON",
+				slog.Any("error", err))
+
 			return err
 
 		// In some circumstances Decode() may also return an
@@ -54,6 +59,9 @@ func ParseJsonBody(w http.ResponseWriter, r *http.Request, maxBytes int64, dest 
 			msg := fmt.Sprintf("request body contains badly-formed JSON")
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, msg)
+			log.Info(r.Context(), logModule, "Request body contains badly-formed JSON. Unexpected EOF.",
+				slog.Any("error", err))
+
 			return err
 
 		// Catch any type errors, like trying to assign a string in the
@@ -64,6 +72,10 @@ func ParseJsonBody(w http.ResponseWriter, r *http.Request, maxBytes int64, dest 
 			msg := fmt.Sprintf("request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, msg)
+			log.Info(r.Context(), logModule, "Request body contains an invalid value type",
+				slog.String("field", unmarshalTypeError.Field),
+				slog.Any("error", err))
+
 			return err
 
 		// Catch the error caused by extra unexpected fields in the request
@@ -76,6 +88,9 @@ func ParseJsonBody(w http.ResponseWriter, r *http.Request, maxBytes int64, dest 
 			msg := fmt.Sprintf("Request body contains unknown field %s", fieldName)
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, msg)
+			log.Info(r.Context(), logModule, "Unknown field: %s", fieldName,
+				slog.Any("error", err))
+
 			return err
 
 		// An io.EOF error is returned by Decode() if the request body is
@@ -84,6 +99,9 @@ func ParseJsonBody(w http.ResponseWriter, r *http.Request, maxBytes int64, dest 
 			msg := "request body must not be empty"
 			w.WriteHeader(http.StatusBadRequest)
 			_, _ = io.WriteString(w, msg)
+			log.Info(r.Context(), logModule, "Request body was empty",
+				slog.Any("error", err))
+
 			return err
 
 		// Catch the error caused by the request body being too large. Again
@@ -93,12 +111,16 @@ func ParseJsonBody(w http.ResponseWriter, r *http.Request, maxBytes int64, dest 
 			msg := fmt.Sprintf("request body must not be larger than %d bytes", maxBytes)
 			w.WriteHeader(http.StatusRequestEntityTooLarge)
 			_, _ = io.WriteString(w, msg)
+			log.Info(r.Context(), logModule, "Request body was too large",
+				slog.Any("error", err))
+
 			return err
 
 		// Otherwise default to logging the error and sending a 500 Internal
 		// Server Error response.
 		default:
-			slog.Error(err.Error())
+			log.Info(r.Context(), logModule, "Error parsing json body",
+				slog.Any("error", err))
 			msg := http.StatusText(http.StatusInternalServerError)
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = io.WriteString(w, msg)

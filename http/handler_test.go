@@ -44,7 +44,7 @@ func Test_PatternRegistrations(t *testing.T) {
 			config.ProxyPath = tt.proxyPath
 			PatternMuxer = http.NewServeMux()
 			RegisterStaticHandler(tt.foundPath, http.HandlerFunc(fnFound))
-			h := UseMuxer(PatternMuxer, http.HandlerFunc(fnNotFound))
+			h := WithMuxer(PatternMuxer, http.HandlerFunc(fnNotFound))
 
 			req := httptest.NewRequest("GET", tt.path, nil)
 			w := httptest.NewRecorder()
@@ -88,7 +88,7 @@ func Test_AppRegistrations(t *testing.T) {
 			config.ProxyPath = tt.proxyPath
 			AppMuxer = http.NewServeMux()
 			RegisterAppHandler(tt.foundPath, http.HandlerFunc(fnFound))
-			h := UseMuxer(AppMuxer, http.HandlerFunc(fnNotFound))
+			h := WithMuxer(AppMuxer, http.HandlerFunc(fnNotFound))
 
 			req := httptest.NewRequest("GET", tt.path, nil)
 			w := httptest.NewRecorder()

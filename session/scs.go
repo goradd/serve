@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/goradd/serve/pkg/log"
+	"github.com/goradd/serve/log"
 )
 
 const scsSessionDataKey = "goradd.data"
@@ -45,13 +45,13 @@ func (mgr ScsManager) Use(next http.Handler) http.Handler {
 		var sess *Session
 		if d := mgr.SessionManager.Get(ctx, scsSessionDataKey); d != nil {
 			sess = d.(*Session)
-			log.Debug(ctx, "Found session")
+			log.Debug(ctx, "session", "Found session")
 		} else {
 			sess = NewSession()
-			log.Debug(ctx, "Creating new session")
+			log.Debug(ctx, "session", "Creating new session")
 		}
 
-		ctx = context.WithValue(ctx, sessionContext, sess)
+		ctx = context.WithValue(ctx, sessionContext{}, sess)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 
@@ -77,7 +77,7 @@ func (mgr ScsManager) Use(next http.Handler) http.Handler {
 				panic("Error marshalling session data: " + err.Error())
 				return
 			}
-			log.Debug(ctx, "Writing session cookie")
+			log.Debug(ctx, "session", "Writing session cookie")
 			mgr.SessionManager.WriteSessionCookie(ctx, w, token2, expiry)
 		} else {
 			if err = mgr.SessionManager.Clear(ctx); err != nil {

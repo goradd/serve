@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	strings2 "github.com/goradd/goradd/pkg/strings"
+	"github.com/goradd/serve/log"
+	strings2 "github.com/goradd/strings"
 )
 
 // ParseValueAndParams returns the value and param map for Content-Type and Content-Disposition header values.
@@ -44,13 +45,13 @@ func ParseAuthorizationHeader(auth string) (scheme, params string) {
 func ValidateHeader(header http.Header) bool {
 	for k, a := range header {
 		if !strings2.IsASCII(k) {
-			slog.Info("A header key did not contain only ASCII values: ",
+			log.Info(nil, logModule, "A header key did not contain only ASCII values",
 				slog.String("key", k))
 			return false
 		}
 		for _, h := range a {
 			if !strings2.IsASCII(h) {
-				slog.Info("A header value did not contain only ASCII values: ",
+				log.Info(nil, logModule, "A header value did not contain only ASCII values",
 					slog.String("key", k),
 					slog.String("value", h))
 				return false
@@ -58,4 +59,16 @@ func ValidateHeader(header http.Header) bool {
 		}
 	}
 	return true
+}
+
+// WithHeaderValidator insert middleware into the handler stack that performs OWASP style validation on a request.
+func WithHeaderValidator(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		if !ValidateHeader(r.Header) {
+			w.WriteHeader(http.StatusBadRequest)
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	}
+	return http.HandlerFunc(fn)
 }

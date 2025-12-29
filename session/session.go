@@ -8,28 +8,16 @@ import (
 	"github.com/goradd/maps"
 )
 
-type sessionContextType string
+type sessionContext struct{}
 
-const sessionContext sessionContextType = "goradd.session"
 const sessionResetKey string = "goradd.reset"
 const timezoneKey string = "goradd.timezone"
 
 type sessionData = maps.SafeMap[string, interface{}]
 
-var sessionManager ManagerI
-
 // ManagerI is the interface for session managers.
 type ManagerI interface {
 	Use(http.Handler) http.Handler
-}
-
-// SetSessionManager injects the given session manager as the global session manager
-func SetSessionManager(m ManagerI) {
-	sessionManager = m
-}
-
-func SessionManager() ManagerI {
-	return sessionManager
 }
 
 // Session is the object that is stored in the context. (Actually a pointer to that object).
@@ -58,22 +46,14 @@ func (s *Session) UnmarshalBinary(data []byte) error {
 	return s.data.UnmarshalBinary(data)
 }
 
-// Use injects the session manager into the page management process. It adds to the
-// context in the Request object so that later session requests can get to the session information, and also
-// wraps the given handler in pre and post processing functions. It should be called from your middleware
-// processing stack.
-func Use(next http.Handler) http.Handler {
-	return sessionManager.Use(next)
-}
-
 // getSession returns the session object.
 func getSession(ctx context.Context) *Session {
-	return ctx.Value(sessionContext).(*Session)
+	return ctx.Value(sessionContext{}).(*Session)
 }
 
 // HasSession returns true if the session exists.
 func HasSession(ctx context.Context) bool {
-	return ctx.Value(sessionContext) != nil
+	return ctx.Value(sessionContext{}) != nil
 }
 
 // Has returns true if the given key exists in the session store

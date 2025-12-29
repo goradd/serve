@@ -2,6 +2,7 @@ package pool
 
 import (
 	"bytes"
+	"github.com/goradd/serve/log"
 	"log/slog"
 	"sync"
 )
@@ -63,7 +64,7 @@ func (p *pool) PutBuffer(buffer *bytes.Buffer) {
 		// Log when our buffer is bigger than MaxBufferSize. If this is happening a lot the value should be increased.
 		// This might happen when serving large files through the buffered server.
 		// Consider bypassing the buffered server and serving them directly instead.
-		slog.Info("Buffer size was bigger than MaxBufferSize.",
+		log.Info(nil, "ppol", "Buffer size was bigger than MaxBufferSize.",
 			slog.Any("Buffer.Cap", buffer.Cap()))
 	}
 }

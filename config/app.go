@@ -5,10 +5,6 @@ package config
 
 import "time"
 
-// HSTSTimeout sets the HSTS timeout length in seconds. See HSTSHandler in app_base.go for info
-// Set this to -1 to turn off HSTS
-var HSTSTimeout int64 = 86400 // one day
-
 // ReadTimeout specifies the time that a client has to complete sending us its request.
 // It helps prevent an attack where the client opens a connection and then sends us data really slowly.
 // See go's http package, server.go for details.
